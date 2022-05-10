@@ -2,26 +2,34 @@ import * as fs from "fs-extra";
 import * as proc from "child_process";
 import * as vscode from "vscode";
 
-export function compile(outputChannel: vscode.OutputChannel) {
+/**
+ * Creates a folder and copies files into it with the correct folder structure to deploy to Salesforce based on Git commits
+ * @param outputChannel The channel in VSCode to write the output from the deployment to
+ * @param deploymentDirectory The directory that the files to deploy are stored in
+ */
+export function compile(
+  outputChannel: vscode.OutputChannel,
+  deploymentDirectory: string
+): void {
   const options = [
     {
       label: "Yes",
-      description: "Keeps the tmp directory",
+      description: `Keeps the ${deploymentDirectory} directory`,
       value: true,
     },
     {
       label: "No",
-      description: "Deletes the tmp directory",
+      description: `Deletes the ${deploymentDirectory} directory`,
       value: false,
     },
   ];
   vscode.window
-    .showQuickPick(options, { title: "Keep tmp directory" })
+    .showQuickPick(options, { title: `Keep ${deploymentDirectory} directory` })
     .then((keepDirectory) => {
       if (keepDirectory === null || keepDirectory === undefined) {
         return null;
       } else if (keepDirectory.value === false) {
-        fs.rm("tmp", { recursive: true });
+        fs.rm(deploymentDirectory, { recursive: true });
       }
       vscode.window
         .showInputBox({
@@ -56,8 +64,8 @@ export function compile(outputChannel: vscode.OutputChannel) {
                       var needsTest = [];
                       var staticResources = [];
                       var files = stdout.split("\n");
-                      if (!fs.existsSync("tmp")) {
-                        fs.mkdirSync("tmp");
+                      if (!fs.existsSync(deploymentDirectory)) {
+                        fs.mkdirSync(deploymentDirectory);
                       }
                       for (const f of files) {
                         if (!f.startsWith("force-app/main/default/")) {
@@ -66,8 +74,10 @@ export function compile(outputChannel: vscode.OutputChannel) {
                         var folders = f
                           .replace("force-app/main/default/", "")
                           .split("/");
-                        if (!fs.existsSync(`tmp/${folders[0]}`)) {
-                          fs.mkdirSync(`tmp/${folders[0]}`);
+                        if (
+                          !fs.existsSync(`${deploymentDirectory}/${folders[0]}`)
+                        ) {
+                          fs.mkdirSync(`${deploymentDirectory}/${folders[0]}`);
                         }
                         if (
                           ["aura", "lwc", "email"].indexOf(folders[0]) !== -1
@@ -82,15 +92,17 @@ export function compile(outputChannel: vscode.OutputChannel) {
                             try {
                               fs.copySync(
                                 `force-app/main/default/aura/${folders[1]}`,
-                                `tmp/${folders[0]}/${folders[1]}`
+                                `${deploymentDirectory}/${folders[0]}/${folders[1]}`
                               );
                             } catch (err) {
                               if (
                                 fs.readdirSync(
-                                  `tmp/${folders[0]}/${folders[1]}`
+                                  `${deploymentDirectory}/${folders[0]}/${folders[1]}`
                                 ).length === 0
                               ) {
-                                fs.rmdirSync(`tmp/${folders[0]}/${folders[1]}`);
+                                fs.rmdirSync(
+                                  `${deploymentDirectory}/${folders[0]}/${folders[1]}`
+                                );
                               }
                               missing.push(f);
                             }
@@ -98,7 +110,7 @@ export function compile(outputChannel: vscode.OutputChannel) {
                           try {
                             fs.copyFileSync(
                               f,
-                              `tmp/${folders[0]}/${folders[1]}/${folders[2]}`
+                              `${deploymentDirectory}/${folders[0]}/${folders[1]}/${folders[2]}`
                             );
                           } catch (err) {
                             missing.push(f);
@@ -107,7 +119,7 @@ export function compile(outputChannel: vscode.OutputChannel) {
                             try {
                               fs.copyFileSync(
                                 f + "-meta.xml",
-                                `tmp/${folders[0]}/${folders[1]}/${folders[2]}`
+                                `${deploymentDirectory}/${folders[0]}/${folders[1]}/${folders[2]}`
                               );
                             } catch (err) {
                               continue;
@@ -121,10 +133,17 @@ export function compile(outputChannel: vscode.OutputChannel) {
                             "pages",
                             "triggers",
                             "customPermissions",
+                            "wave",
                           ].indexOf(folders[0]) !== -1
                         ) {
-                          if (!fs.existsSync(`tmp/${folders[0]}`)) {
-                            fs.mkdirSync(`tmp/${folders[0]}`);
+                          if (
+                            !fs.existsSync(
+                              `${deploymentDirectory}/${folders[0]}`
+                            )
+                          ) {
+                            fs.mkdirSync(
+                              `${deploymentDirectory}/${folders[0]}`
+                            );
                           }
                           if (f.endsWith("-meta.xml")) {
                             continue;
@@ -132,7 +151,7 @@ export function compile(outputChannel: vscode.OutputChannel) {
                           try {
                             fs.copyFileSync(
                               f,
-                              `tmp/${folders[0]}/${folders[1]}`
+                              `${deploymentDirectory}/${folders[0]}/${folders[1]}`
                             );
                             if (
                               ["classes", "triggers"].indexOf(folders[0]) !== -1
@@ -160,7 +179,7 @@ export function compile(outputChannel: vscode.OutputChannel) {
                             if (fs.existsSync(`${f}-meta.xml`)) {
                               fs.copyFileSync(
                                 `${f}-meta.xml`,
-                                `tmp/${folders[0]}/${folders[1]}-meta.xml`
+                                `${deploymentDirectory}/${folders[0]}/${folders[1]}-meta.xml`
                               );
                             }
                           } catch (err) {
@@ -168,15 +187,19 @@ export function compile(outputChannel: vscode.OutputChannel) {
                           }
                         } else if (folders[0] === "objects") {
                           if (
-                            !fs.existsSync(`tmp/${folders[0]}/${folders[1]}`)
+                            !fs.existsSync(
+                              `${deploymentDirectory}/${folders[0]}/${folders[1]}`
+                            )
                           ) {
-                            fs.mkdirsSync(`tmp/${folders[0]}/${folders[1]}`);
+                            fs.mkdirsSync(
+                              `${deploymentDirectory}/${folders[0]}/${folders[1]}`
+                            );
                           }
                           if (f.endsWith("object-meta.xml")) {
                             try {
                               fs.copyFileSync(
                                 f,
-                                `tmp/${folders[0]}/${folders[1]}/${folders[2]}`
+                                `${deploymentDirectory}/${folders[0]}/${folders[1]}/${folders[2]}`
                               );
                             } catch (err) {
                               missing.push(f);
@@ -184,17 +207,17 @@ export function compile(outputChannel: vscode.OutputChannel) {
                           } else {
                             if (
                               !fs.existsSync(
-                                `tmp/${folders[0]}/${folders[1]}/${folders[2]}`
+                                `${deploymentDirectory}/${folders[0]}/${folders[1]}/${folders[2]}`
                               )
                             ) {
                               fs.mkdirSync(
-                                `tmp/${folders[0]}/${folders[1]}/${folders[2]}`
+                                `${deploymentDirectory}/${folders[0]}/${folders[1]}/${folders[2]}`
                               );
                             }
                             try {
                               fs.copyFileSync(
                                 f,
-                                `tmp/${folders[0]}/${folders[1]}/${folders[2]}/${folders[3]}`
+                                `${deploymentDirectory}/${folders[0]}/${folders[1]}/${folders[2]}/${folders[3]}`
                               );
                             } catch (err) {
                               missing.push(f);
@@ -204,27 +227,37 @@ export function compile(outputChannel: vscode.OutputChannel) {
                           ["reports", "dashboards"].indexOf(folders[0]) !== -1
                         ) {
                           if (f.endsWith("Folder-meta.xml")) {
-                            if (!fs.existsSync(`tmp/${folders[0]}`)) {
-                              fs.mkdirSync(`tmp/${folders[0]}`);
+                            if (
+                              !fs.existsSync(
+                                `${deploymentDirectory}/${folders[0]}`
+                              )
+                            ) {
+                              fs.mkdirSync(
+                                `${deploymentDirectory}/${folders[0]}`
+                              );
                             }
                             try {
                               fs.copyFileSync(
                                 f,
-                                `tmp/${folders[0]}/${folders[1]}`
+                                `${deploymentDirectory}/${folders[0]}/${folders[1]}`
                               );
                             } catch (err) {
                               missing.push(f);
                             }
                           } else {
                             if (
-                              !fs.existsSync(`tmp/${folders[0]}/${folders[1]}`)
+                              !fs.existsSync(
+                                `${deploymentDirectory}/${folders[0]}/${folders[1]}`
+                              )
                             ) {
-                              fs.mkdirSync(`tmp/${folders[0]}/${folders[1]}`);
+                              fs.mkdirSync(
+                                `${deploymentDirectory}/${folders[0]}/${folders[1]}`
+                              );
                             }
                             try {
                               fs.copyFileSync(
                                 f,
-                                `tmp/${folders[0]}/${folders[1]}/${folders[2]}`
+                                `${deploymentDirectory}/${folders[0]}/${folders[1]}/${folders[2]}`
                               );
                             } catch (err) {
                               missing.push(f);
@@ -234,13 +267,19 @@ export function compile(outputChannel: vscode.OutputChannel) {
                           staticResources.push(f);
                           continue;
                         } else {
-                          if (!fs.existsSync(`tmp/${folders[0]}`)) {
-                            fs.mkdirSync(`tmp/${folders[0]}`);
+                          if (
+                            !fs.existsSync(
+                              `${deploymentDirectory}/${folders[0]}`
+                            )
+                          ) {
+                            fs.mkdirSync(
+                              `${deploymentDirectory}/${folders[0]}`
+                            );
                           }
                           try {
                             fs.copyFileSync(
                               f,
-                              `tmp/${folders[0]}/${folders[1]}`
+                              `${deploymentDirectory}/${folders[0]}/${folders[1]}`
                             );
                           } catch (err) {
                             missing.push(f);

@@ -3,6 +3,10 @@
   "displayName": "Salesforce Deployment Generator",
   "description": "Creates a deployment for Salesforce using recent Git commits",
   "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tannerrobinaugh/Salesforce-Deployment-Generator"
+  },
   "engines": {
     "vscode": "^1.65.0"
   },

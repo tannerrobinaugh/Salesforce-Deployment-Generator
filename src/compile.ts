@@ -87,11 +87,12 @@ export function compile(
                           } else if (
                             folders[0] === "aura" ||
                             (folders[0] === "lwc" &&
-                              folders[1] !== "jsconfig.json")
+                              folders[1] !== "jsconfig.json" &&
+                              folders[1] !== "__tests__")
                           ) {
                             try {
                               fs.copySync(
-                                `force-app/main/default/aura/${folders[1]}`,
+                                `force-app/main/default/${folders[0]}/${folders[1]}`,
                                 `${deploymentDirectory}/${folders[0]}/${folders[1]}`
                               );
                             } catch (err) {

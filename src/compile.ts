@@ -128,11 +128,11 @@ export function compile(
                           }
                           if (
                             fs.existsSync(
-                              `${deploymentDirectory}/${folders[0]}/${folders[1]}/__tests__`
+                              `${deploymentDirectory}/${folders[0]}/${folders[1]}/__tests__/`
                             )
                           ) {
                             fs.rmdirSync(
-                              `${deploymentDirectory}/${folders[0]}/${folders[1]}/__tests__`
+                              `${deploymentDirectory}/${folders[0]}/${folders[1]}/__tests__/`
                             );
                           }
                         } else if (

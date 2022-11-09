@@ -2,7 +2,7 @@
   "name": "salesforce-deployment-generator",
   "displayName": "Salesforce Deployment Generator",
   "description": "Creates a deployment for Salesforce using recent Git commits",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "license": "MIT",
   "publisher": "TannerRobinaugh",
   "repository": {

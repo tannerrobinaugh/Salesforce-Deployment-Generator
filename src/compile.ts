@@ -1,6 +1,7 @@
 import * as fs from "fs-extra";
 import * as proc from "child_process";
 import * as vscode from "vscode";
+import { rm } from "fs";
 
 /**
  * Creates a folder and copies files into it with the correct folder structure to deploy to Salesforce based on Git commits
@@ -87,8 +88,7 @@ export function compile(
                           } else if (
                             folders[0] === "aura" ||
                             (folders[0] === "lwc" &&
-                              folders[1] !== "jsconfig.json" &&
-                              folders[1] !== "__tests__")
+                              folders[1] !== "jsconfig.json")
                           ) {
                             try {
                               fs.copySync(
@@ -125,6 +125,15 @@ export function compile(
                             } catch (err) {
                               continue;
                             }
+                          }
+                          if (
+                            fs.existsSync(
+                              `${deploymentDirectory}/${folders[0]}/${folders[1]}/__tests__`
+                            )
+                          ) {
+                            fs.rmdirSync(
+                              `${deploymentDirectory}/${folders[0]}/${folders[1]}/__tests__`
+                            );
                           }
                         } else if (
                           [

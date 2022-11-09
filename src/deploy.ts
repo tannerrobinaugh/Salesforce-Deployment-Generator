@@ -26,6 +26,7 @@ export function deploy(
   vscode.window
     .showQuickPick(testOptions, { title: "Run Tests?" })
     .then((runTests) => {
+      console.log(runTests);
       if (runTests === null || runTests === undefined) {
         return null;
       } else if (runTests.value === "No Tests") {
@@ -65,7 +66,7 @@ export function deploy(
             },
           })
           .then((tests) => {
-            if (tests === null) {
+            if (tests === null || tests === undefined) {
               return null;
             }
             const dep = proc.spawn(

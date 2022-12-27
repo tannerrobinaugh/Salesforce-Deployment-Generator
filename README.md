@@ -41,7 +41,7 @@ This extension comes with two settings that can be edited either in the UI or th
 
 ### Deployment Directory Name
 
-This setting indicates what the deployment directory should be called. This value is a string and will be referenced throughout the extension. It is recommend that whatever you call this directory be added to your .gitignore file
+This setting indicates what the deployment directory should be called. This value is a string and will be referenced throughout the extension. It is recommended that whatever you call this directory be added to your .gitignore file
 
 **Note:** If you run the generate deployment command, then change the directory name, and then finally try to deploy, you will run into errors.
 

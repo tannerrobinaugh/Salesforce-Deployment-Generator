@@ -10,15 +10,13 @@
     "url": "https://github.com/tannerrobinaugh/Salesforce-Deployment-Generator"
   },
   "engines": {
-    "vscode": "^1.65.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
     "Other"
   ],
   "activationEvents": [
-    "workspaceContains:sfdx-project.json",
-    "onCommand:salesforce-deployment-generator.generateDeployment",
-    "onCommand:salesforce-deployment-generator.deployment"
+    "workspaceContains:sfdx-project.json"
   ],
   "main": "./dist/extension.js",
   "contributes": {

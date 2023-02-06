@@ -101,7 +101,7 @@ export function compile(
                                   `${deploymentDirectory}/${folders[0]}/${folders[1]}`
                                 ).length === 0
                               ) {
-                                fs.rmdirSync(
+                                fs.removeSync(
                                   `${deploymentDirectory}/${folders[0]}/${folders[1]}`
                                 );
                               }
@@ -131,7 +131,7 @@ export function compile(
                               `${deploymentDirectory}/${folders[0]}/${folders[1]}/__tests__/`
                             )
                           ) {
-                            fs.rmdirSync(
+                            fs.removeSync(
                               `${deploymentDirectory}/${folders[0]}/${folders[1]}/__tests__/`
                             );
                           }

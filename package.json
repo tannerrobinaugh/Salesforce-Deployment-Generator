@@ -90,7 +90,7 @@
   },
   "dependencies": {
     "fs-extra": "^10.0.1",
-    "sfdx-cli": "^7.147.1"
+    "sfdx-cli": "^7.186.2"
   },
   "extensionDependencies": [
     "salesforce.salesforcedx-vscode"

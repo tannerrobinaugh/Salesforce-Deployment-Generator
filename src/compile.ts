@@ -1,7 +1,6 @@
 import * as fs from "fs-extra";
 import * as proc from "child_process";
 import * as vscode from "vscode";
-import { rm } from "fs";
 
 /**
  * Creates a folder and copies files into it with the correct folder structure to deploy to Salesforce based on Git commits

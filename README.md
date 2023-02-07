@@ -8,7 +8,7 @@ Install through VS Code extensions or by downloading the .VSIX file from the [re
 
 ## Dependencies
 
-Installing the extension should also install all npm related dependencies, but in case not this extension depends on the [sfdx-cli](https://www.npmjs.com/package/sfdx-cli). This extension also depends on [Git](https://git-scm.com/) being installed on your machine.
+This extension depends on the [sfdx-cli](https://www.npmjs.com/package/sfdx-cli) package being installed. This extension also depends on [Git](https://git-scm.com/) being installed on your machine.
 
 ## Usage
 

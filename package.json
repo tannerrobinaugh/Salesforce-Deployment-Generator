@@ -70,7 +70,7 @@
     "deploy": "vsce publish --yarn"
   },
   "devDependencies": {
-    "@types/fs-extra": "^9.0.13",
+    "@types/fs-extra": "^11.0.1",
     "@types/glob": "^8.0.1",
     "@types/mocha": "^10.0.1",
     "@types/node": "18.x",
@@ -88,7 +88,7 @@
     "webpack-cli": "^5.0.1"
   },
   "dependencies": {
-    "fs-extra": "^10.0.1"
+    "fs-extra": "^11.1.0"
   },
   "extensionDependencies": [
     "salesforce.salesforcedx-vscode"

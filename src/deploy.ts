@@ -6,6 +6,19 @@ export function deploy(
   outputChannel: vscode.OutputChannel,
   deploymentDirectory: string
 ): void {
+  const dryRunOptions = [
+    {
+      label: "Dry Run",
+      description:
+        "Validate deploy and run Apex tests but does not save to the org",
+      value: "Dry Run",
+    },
+    {
+      label: "Real Deployment",
+      description: "Does a real deployment (not a dry run)",
+      value: "Real Deployment",
+    },
+  ];
   const testOptions = [
     {
       label: "No Tests",
@@ -24,91 +37,97 @@ export function deploy(
     },
   ];
   vscode.window
-    .showQuickPick(testOptions, { title: "Run Tests?" })
-    .then((runTests) => {
-      console.log(runTests);
-      if (runTests === null || runTests === undefined) {
-        return null;
-      } else if (runTests.value === "No Tests") {
-        const dep = proc.spawn(
-          `sfdx force:source:deploy -p ./${deploymentDirectory} -l NoTestRun`,
-          { shell: true }
-        );
-        outputChannel.show();
-        dep.stdout.on("data", (data) => {
-          outputChannel.appendLine(data);
-        });
-        dep.stderr.on("data", (data) => {
-          outputChannel.appendLine(data);
-        });
-      } else if (runTests.value === "All Tests") {
-        const dep = proc.spawn(
-          `sfdx force:source:deploy -p ./${deploymentDirectory} -l RunLocalTests`,
-          { shell: true }
-        );
-        outputChannel.show();
-        dep.stdout.on("data", (data) => {
-          outputChannel.appendLine(data);
-        });
-        dep.stderr.on("data", (data) => {
-          outputChannel.appendLine(data);
-        });
-      } else {
-        vscode.window
-          .showInputBox({
-            title: "Enter Tests",
-            prompt: "Enter Tests",
-            validateInput: (value) => {
-              if (value.indexOf(" ") >= 0) {
-                return "Do not include spaces";
-              }
-              return null;
-            },
-          })
-          .then((tests) => {
-            if (tests === null || tests === undefined) {
-              return null;
+    .showQuickPick(dryRunOptions, { title: "Dry Run or Real Deployment" })
+    .then((dryRunResponse) => {
+      vscode.window
+        .showQuickPick(testOptions, { title: "Run Tests?" })
+        .then((runTests) => {
+          var deployCommand: string = "";
+          var useSFCommands = vscode.workspace
+            .getConfiguration("salesforce-deployment-generator")
+            .get("useSFCommands");
+          if (runTests === undefined) {
+            return null;
+          } else if (runTests.value === "No Tests") {
+            if (useSFCommands) {
+              deployCommand = `sf project deploy start -d ./${deploymentDirectory} -l NoTestRun`;
+            } else {
+              deployCommand = `sfdx force:source:deploy -p ./${deploymentDirectory} -l NoTestRun`;
             }
-            const dep = proc.spawn(
-              `sfdx force:source:deploy -p ./${deploymentDirectory} -l RunSpecifiedTests -r ${tests}`,
-              { shell: true }
-            );
-            outputChannel.show();
-            dep.stdout.on("data", (data) => {
-              outputChannel.appendLine(data);
-            });
-            dep.stderr.on("data", (data) => {
-              outputChannel.appendLine(data);
-            });
-          });
-      }
-      const removeDirectorySetting = vscode.workspace
-        .getConfiguration("salesforce-deployment-generator")
-        .get("removeDeploymentDirectoryAfterDeploy");
-      if (removeDirectorySetting === "Always remove directory") {
-        fs.rm(deploymentDirectory, { recursive: true });
-      } else if (removeDirectorySetting === "Prompt for removal") {
-        const removeOptions = [
-          {
-            label: "Keep Directory",
-            description: `Keep the ${deploymentDirectory} directory`,
-            value: false,
-          },
-          {
-            label: "Remove Directory",
-            description: `Remove the ${deploymentDirectory} directory`,
-            value: true,
-          },
-        ];
-        vscode.window
-          .showQuickPick(removeOptions, {
-            title: `Keep or Remove ${deploymentDirectory} Directory`,
-          })
-          .then((removeDirectory) => {
-            if (removeDirectory) {
-              fs.rm(deploymentDirectory, { recursive: true });
+          } else if (runTests.value === "All Tests") {
+            if (useSFCommands) {
+              deployCommand = `sf project deploy start -d ./${deploymentDirectory} -l RunLocalTests`;
+            } else {
+              deployCommand = `sfdx force:source:deploy -p ./${deploymentDirectory} -l RunLocalTests`;
             }
+          } else {
+            vscode.window
+              .showInputBox({
+                title: "Enter Tests",
+                prompt: "Enter Tests",
+                validateInput: (value) => {
+                  if (value.indexOf(" ") >= 0) {
+                    return "Do not include spaces";
+                  }
+                  return null;
+                },
+              })
+              .then((tests) => {
+                if (tests === undefined) {
+                  return null;
+                }
+                if (useSFCommands) {
+                  deployCommand = `sf project deploy start -d ./${deploymentDirectory} -l RunSpecifiedTests -t ${tests}`;
+                } else {
+                  deployCommand = `sfdx force:source:deploy -p ./${deploymentDirectory} -l RunSpecifiedTests -r ${tests}`;
+                }
+              });
+          }
+          if (
+            dryRunResponse === undefined ||
+            dryRunResponse.value === "Dry Run"
+          ) {
+            if (useSFCommands) {
+              deployCommand += " --dry-run";
+            } else {
+              deployCommand += " -c";
+            }
+          }
+          const dep = proc.spawn(deployCommand, { shell: true });
+          dep.stdout.on("data", (data) => {
+            outputChannel.appendLine(data);
           });
-      }
+          dep.stderr.on("data", (data) => {
+            outputChannel.appendLine(data);
+          });
+          const removeDirectorySetting = vscode.workspace
+            .getConfiguration("salesforce-deployment-generator")
+            .get("removeDeploymentDirectoryAfterDeploy");
+          if (removeDirectorySetting === "Always remove directory") {
+            fs.rm(deploymentDirectory, { recursive: true });
+          } else if (removeDirectorySetting === "Prompt for removal") {
+            const removeOptions = [
+              {
+                label: "Keep Directory",
+                description: `Keep the ${deploymentDirectory} directory`,
+                value: false,
+              },
+              {
+                label: "Remove Directory",
+                description: `Remove the ${deploymentDirectory} directory`,
+                value: true,
+              },
+            ];
+            vscode.window
+              .showQuickPick(removeOptions, {
+                title: `Keep or Remove ${deploymentDirectory} Directory`,
+              })
+              .then((removeDirectory) => {
+                if (removeDirectory) {
+                  fs.rm(deploymentDirectory, { recursive: true });
+                }
+              });
+          }
+        });
     });
 }

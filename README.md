@@ -8,7 +8,7 @@ Install through VS Code extensions or by downloading the .VSIX file from the [re
 
 ## Dependencies
 
-This extension depends on the [sfdx-cli](https://www.npmjs.com/package/sfdx-cli) package being installed. This extension also depends on [Git](https://git-scm.com/) being installed on your machine.
+This extension depends on the [@salesforce/cli](https://www.npmjs.com/package/@salesforce/cli) package being installed. The older [sfdx-cli](https://www.npmjs.com/package/sfdx-cli) package can be used instead but it will eventually be deprecated. This extension also depends on [Git](https://git-scm.com/) being installed on your machine.
 
 ## Usage
 
@@ -30,10 +30,11 @@ This command deploys the files in the deployment directory to the Salesforce ins
 
 The command executes as follows:
 
-1. Asks if you would like to run no tests, all tests, or specified tests
-2. If you select no tests or all tests, a deployment is started with the appropriate option.
-3. If you select specified tests, then you are prompted to enter the tests you would like to run. These tests must be comma separated with no spaces.
-4. The output from this deployment is displayed in an output window called Salesforce Deployment Compilation Report.
+1. Asks if this is a dry run or real deployment. If this is a dry run, then nothing is saved to the target org.
+2. Asks if you would like to run no tests, all tests, or specified tests.
+3. If you select no tests or all tests, a deployment is started with the appropriate option.
+4. If you select specified tests, then you are prompted to enter the tests you would like to run. These tests must be comma separated with no spaces.
+5. The output from this deployment is displayed in an output window called Salesforce Deployment Compilation Report.
 
 ## Settings
 

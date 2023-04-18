@@ -2,7 +2,7 @@
   "name": "salesforce-deployment-generator",
   "displayName": "Salesforce Deployment Generator",
   "description": "Creates a deployment for Salesforce using recent Git commits",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "license": "MIT",
   "publisher": "TannerRobinaugh",
   "repository": {
@@ -10,7 +10,7 @@
     "url": "https://github.com/tannerrobinaugh/Salesforce-Deployment-Generator"
   },
   "engines": {
-    "vscode": "^1.75.0"
+    "vscode": "^1.77.0"
   },
   "categories": [
     "Other"
@@ -48,6 +48,11 @@
             "Removes the deployment directory after deployment",
             "Prompts for whether the deployment directory should be removed after deployment or not"
           ]
+        },
+        "salesforce-deployment-generator.useSFCommands": {
+          "type": "boolean",
+          "default": "true",
+          "description": "True means the newer \"sf\" commands will be used, false means the older (possibly deprecated) \"sfdx\" commands will be used"
         },
         "salesforce-deployment-generator.deploymentDirectoryName": {
           "type": "string",
